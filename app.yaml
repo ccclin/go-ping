@@ -1,0 +1,11 @@
+runtime: go112
+
+# service: ping
+env: standard
+instance_class: F1
+handlers:
+  - url: '/ping/.*'
+    script: auto
+
+env_variables:
+  internal_dns: 169.254.169.254
