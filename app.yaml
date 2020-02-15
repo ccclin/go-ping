@@ -8,4 +8,4 @@ handlers:
     script: auto
 
 env_variables:
-  internal_dns: 169.254.169.254
+  INTERNAL_DNS: 169.254.169.254
