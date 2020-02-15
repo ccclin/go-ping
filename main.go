@@ -38,12 +38,12 @@ func main() {
 			log.Fatalf("Listen: %s\n", err)
 		}
 	}()
-	go gracefullShutdown(srv, quit, done)
+	go gracefulShutdown(srv, quit, done)
 	<-done
 	log.Println("Server stopped")
 }
 
-func gracefullShutdown(server *http.Server, quit <-chan os.Signal, done chan<- bool) {
+func gracefulShutdown(server *http.Server, quit <-chan os.Signal, done chan<- bool) {
 	<-quit
 	log.Println("Server is shutting down...")
 
