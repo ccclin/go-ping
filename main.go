@@ -1,26 +1,60 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/sparrc/go-ping"
 )
 
-var internalDNS = os.Getenv("internal_dns")
+var internalDNS = os.Getenv("INTERNAL_DNS")
 
 func main() {
-	http.HandleFunc("/ping", pingHeander)
+	done := make(chan bool, 1)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+
+	router := http.NewServeMux()
+	router.HandleFunc("/ping", pingHeander)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 		log.Printf("Defaulting to port %s", port)
 	}
-
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: router,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Listen: %s\n", err)
+		}
+	}()
+	go gracefullShutdown(srv, quit, done)
+	<-done
+	log.Println("Server stopped")
+}
+
+func gracefullShutdown(server *http.Server, quit <-chan os.Signal, done chan<- bool) {
+	<-quit
+	log.Println("Server is shutting down...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	server.SetKeepAlivesEnabled(false)
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Could not gracefully shutdown the server: %v\n", err)
+	}
+	close(done)
 }
 
 func pingHeander(w http.ResponseWriter, r *http.Request) {
