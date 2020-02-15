@@ -2,6 +2,16 @@
 Use GAE to ping GCP Internal DNS Server
 
 ## How to use
+### Local Test
+```
+$ INTERNAL_DNS=8.8.8.8 go run ./main.go
+```
+
+```
+$ curl http://localhost:8080/ping
+```
+
+### GAE
 - Create a GCP project
 - Deploy
 ```
