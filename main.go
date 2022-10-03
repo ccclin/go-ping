@@ -29,8 +29,9 @@ func main() {
 	log.Printf("Listening on port %s", port)
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
-		Handler: router,
+		Addr:              fmt.Sprintf(":%s", port),
+		Handler:           router,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {
