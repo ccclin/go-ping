@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/sparrc/go-ping"
+	"github.com/go-ping/ping"
 )
 
 var internalDNS = os.Getenv("INTERNAL_DNS")
@@ -74,7 +74,12 @@ func pingHeander(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pinger.Count = 3
-	pinger.Run()
+	err = pinger.Run()
+	if err != nil {
+		log.Printf("pinger error: %v\n", err)
+		http.Error(w, "502", http.StatusBadGateway)
+		return
+	}
 	pinger.Statistics()
 	fmt.Fprintf(w, "Message: %+v", pinger.Statistics())
 }
