@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/go-ping/ping"
+	probing "github.com/prometheus-community/pro-bing"
 )
 
 var internalDNS = os.Getenv("INTERNAL_DNS")
@@ -68,7 +68,7 @@ func pingHeander(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pinger, err := ping.NewPinger(internalDNS)
+	pinger, err := probing.NewPinger(internalDNS)
 	if err != nil {
 		http.Error(w, "502", http.StatusBadGateway)
 		return
